@@ -843,3 +843,30 @@ footer {
   background: #fee2e2;
   color: #991b1b;
 }
+
+
+/* Admin Mode Tabs */
+.admin-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.admin-tab-btn:hover {
+  color: #1e293b;
+  background: #f8fafc;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+.admin-tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  background: #eff6ff;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font-weight: 700;
+}

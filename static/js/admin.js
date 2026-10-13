@@ -168,30 +168,72 @@ const AdminApp = {
     master169: "169細項極限闖關"
   },
 
+  currentRecordMode: "scenario",
+
+  MODE_DESCRIPTIONS: {
+    scenario: "日常生活案例與 17 目標配對之挑戰紀錄",
+    standard: "169 細項具體承諾判斷所屬 17 大目標之挑戰紀錄",
+    cards: "16 卡牌翻牌短時記憶兩兩連線配對之挑戰紀錄",
+    master169: "30 題極限高壓綜合測驗之挑戰紀錄"
+  },
+
+  switchRecordMode(mode) {
+    this.currentRecordMode = mode;
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      if (btn.dataset.mode === mode) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+
+    const modeName = this.MODE_NAMES[mode] || mode;
+    const descEl = document.getElementById("admin-mode-desc");
+    if (descEl) {
+      descEl.innerHTML = `<strong>${modeName} 排行榜：</strong>${this.MODE_DESCRIPTIONS[mode] || ''}`;
+    }
+
+    const exportBtn = document.getElementById("btn-export-csv");
+    if (exportBtn) {
+      exportBtn.innerText = `📥 匯出「${modeName}」CSV 報表`;
+    }
+
+    const searchInput = document.getElementById("record-search");
+    this.loadRecords(searchInput ? searchInput.value.trim() : "");
+  },
+
   async loadRecords(searchQuery = "") {
     try {
-      const url = `/api/admin/records?page=1&page_size=30${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`;
+      const mode = this.currentRecordMode || "scenario";
+      const url = `/api/admin/records?page=1&page_size=50&mode=${mode}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`;
       const res = await fetch(url, { headers: this.getAuthHeaders() });
       if (res.status === 401) return this.handleLogout();
       const data = await res.json();
 
+      const countEl = document.getElementById("admin-mode-count");
+      if (countEl) {
+        countEl.innerText = `共 ${data.total} 筆挑戰紀錄`;
+      }
+
       const tbody = document.getElementById("records-tbody");
       if (!data.items || data.items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:1.5rem;">無符合之挑戰紀錄</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:2rem; color:#64748b;">目前「${this.MODE_NAMES[mode] || mode}」尚無符合條件之挑戰紀錄</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = data.items.map(item => `
+      tbody.innerHTML = data.items.map((item, idx) => `
         <tr>
-          <td>#${item.id}</td>
-          <td>${item.avatar} <strong>${item.nickname}</strong></td>
-          <td>${item.organization}</td>
-          <td><span class="badge-mode">${AdminApp.MODE_NAMES[item.mode] || item.mode}</span></td>
-          <td><strong style="color:#10b981;">${item.total_score}</strong></td>
+          <td><strong>#${item.id}</strong></td>
+          <td>
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+              <span>${item.avatar || '🌱'}</span>
+              <strong>${item.nickname}</strong>
+            </div>
+          </td>
+          <td>${item.organization || "-"}</td>
+          <td><span class="badge-mode">${this.MODE_NAMES[item.mode] || item.mode}</span></td>
+          <td><strong style="color:#10b981; font-size:1rem;">${item.total_score}</strong></td>
           <td>${Math.round(item.correct_count * 100 / (item.total_questions || 1))}%</td>
           <td>🔥 ${item.combo_max}</td>
           <td>${item.time_taken_seconds}s</td>
-          <td style="font-size:0.8rem; color:#64748b;">${item.completed_at}</td>
+          <td style="font-size:0.8rem; color:#64748b;">${item.completed_at ? item.completed_at.slice(0, 16) : '-'}</td>
           <td>
             <button class="btn btn-outline" style="color:#ef4444; border-color:#fca5a5; padding:2px 8px; font-size:0.75rem;" onclick="AdminApp.deleteRecord(${item.id})">刪除</button>
           </td>
@@ -359,7 +401,30 @@ const AdminApp = {
   },
 
   async exportCsv() {
-    window.open(`/api/admin/export/csv`, "_blank");
+    const mode = this.currentRecordMode || "scenario";
+    const modeName = this.MODE_NAMES[mode] || mode;
+    try {
+      const res = await fetch(`/api/admin/export/csv?mode=${mode}`, {
+        headers: this.getAuthHeaders()
+      });
+      if (!res.ok) {
+        alert("匯出報表失敗，請確認登入憑證。");
+        return;
+      }
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `sdgs_${modeName}_挑戰紀錄.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (e) {
+      console.error(e);
+      // Fallback
+      window.open(`/api/admin/export/csv?mode=${mode}&token=${encodeURIComponent(this.token)}`, "_blank");
+    }
   }
 };
 

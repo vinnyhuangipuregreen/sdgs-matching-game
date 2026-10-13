@@ -186,13 +186,37 @@
           <div class="panel">
             <div class="panel-header">
               <div>
-                <h3 style="font-size: 1.1rem;">挑戰紀錄審查與匯出</h3>
-                <p style="font-size: 0.8rem; color: #64748b;">檢視並管理所有挑戰者的遊戲對局與計分日誌</p>
+                <h3 style="font-size: 1.15rem; font-weight:700; color:#1e293b;">挑戰紀錄審查與匯出</h3>
+                <p style="font-size: 0.82rem; color: #64748b; margin-top:2px;">依四大挑戰模式分頁審查對局成績，並支援各別獨立匯出 CSV 報表</p>
               </div>
-              <div style="display:flex; gap:0.5rem;">
-                <input type="text" id="record-search" class="form-input" style="width:200px; padding:0.4rem 0.8rem;" placeholder="搜尋挑戰者或組織...">
-                <button id="btn-export-csv" class="btn btn-success">📥 匯出 CSV 報表</button>
+              <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="record-search" class="form-input" style="width:190px; padding:0.4rem 0.75rem; font-size:0.85rem;" placeholder="搜尋挑戰者或組織...">
+                <button id="btn-export-csv" class="btn btn-success" style="font-size:0.85rem; padding:0.45rem 0.9rem;">
+                  📥 匯出「生活情境入門」CSV 報表
+                </button>
               </div>
+            </div>
+
+            <!-- 4 個模式獨立頁籤 -->
+            <div class="admin-mode-tabs" style="display:flex; gap:0.4rem; margin-bottom:1rem; border-bottom:2px solid #e2e8f0; padding-bottom:0.1rem; overflow-x:auto;">
+              <button class="admin-tab-btn active" data-mode="scenario" onclick="AdminApp.switchRecordMode('scenario')">
+                🏡 生活情境入門
+              </button>
+              <button class="admin-tab-btn" data-mode="standard" onclick="AdminApp.switchRecordMode('standard')">
+                🎯 標準細項配對
+              </button>
+              <button class="admin-tab-btn" data-mode="cards" onclick="AdminApp.switchRecordMode('cards')">
+                🃏 翻牌記憶連連看
+              </button>
+              <button class="admin-tab-btn" data-mode="master169" onclick="AdminApp.switchRecordMode('master169')">
+                👑 169細項極限闖關
+              </button>
+            </div>
+
+            <!-- 當前模式狀態條 -->
+            <div id="admin-mode-banner" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.6rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:#475569;">
+              <span id="admin-mode-desc"><strong>🏡 生活情境入門排行榜：</strong>日常生活案例與 17 目標配對之挑戰紀錄</span>
+              <span id="admin-mode-count" style="font-weight:700; color:#2563eb;">載入中...</span>
             </div>
 
             <div class="table-container">

@@ -205,24 +205,32 @@ def update_setting(key: str, req: SettingUpdateRequest, session=Depends(verify_a
     return {"status": "success", "message": f"設定 [{key}] 更新為 {req.value}"}
 
 @router.get("/export/csv")
-def export_csv(session=Depends(verify_admin_token)):
+def export_csv(mode: Optional[str] = None, session=Depends(verify_admin_token)):
     conn = get_db_connection()
-    rows = conn.execute("""
+    where_sql = "1=1"
+    params = []
+    if mode and mode != "all":
+        where_sql += " AND gs.mode = ?"
+        params.append(mode)
+
+    sql = f"""
     SELECT gs.id, c.nickname, c.organization, gs.mode, gs.difficulty,
            gs.total_score, gs.total_questions, gs.correct_count,
            ROUND(gs.correct_count * 100.0 / NULLIF(gs.total_questions, 0), 1) as accuracy_pct,
            gs.combo_max, gs.time_taken_seconds, gs.completed_at
     FROM game_sessions gs
     JOIN challengers c ON gs.challenger_id = c.id
+    WHERE {where_sql}
     ORDER BY gs.completed_at DESC
-    """).fetchall()
+    """
+    rows = conn.execute(sql, params).fetchall()
     conn.close()
 
     output = io.StringIO()
-    output.write('\\ufeff')
+    output.write('\ufeff')
     writer = csv.writer(output)
     writer.writerow([
-        "對局ID", "挑戰者暱稱", "單位/組織", "遊戲模式", "難度",
+        "對局ID", "挑戰者暱稱", "所屬組織", "遊戲模式", "難度",
         "總分", "總題數", "答對數", "正確率(%)", "最高連擊",
         "耗時(秒)", "完成時間"
     ])
@@ -234,12 +242,16 @@ def export_csv(session=Depends(verify_admin_token)):
     }
     for r in rows:
         row_list = list(r)
-        # column 3 is mode
         if len(row_list) > 3 and row_list[3] in mode_map:
             row_list[3] = mode_map[row_list[3]]
         writer.writerow(row_list)
 
     output.seek(0)
-    response = Response(content=output.getvalue(), media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=sdgs_challenger_records.csv"
+    import urllib.parse
+    mode_label = mode_map.get(mode, "全部模式") if mode and mode != "all" else "全部模式"
+    filename_zh = f"sdgs_{mode_label}_挑戰紀錄.csv"
+    encoded_filename = urllib.parse.quote(filename_zh)
+
+    response = Response(content=output.getvalue(), media_type="text/csv; charset=utf-8")
+    response.headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{encoded_filename}; filename=\"{encoded_filename}\""
     return response

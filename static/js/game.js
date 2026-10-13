@@ -718,7 +718,7 @@ const GameApp = {
               <tr>
                 <th style="width:70px;">名次</th>
                 <th>挑戰者</th>
-                <th>學校 / 組織</th>
+                <th>所屬組織</th>
                 <th>模式</th>
                 <th>總得分</th>
                 <th>正確率</th>

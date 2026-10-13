@@ -32,6 +32,10 @@ app.include_router(admin_routes.router)
 STATIC_DIR = Path(__file__).parent.parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 @app.get("/")
 def serve_index():
     return FileResponse(STATIC_DIR / "index.html")

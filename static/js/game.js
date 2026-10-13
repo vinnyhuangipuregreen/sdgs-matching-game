@@ -67,8 +67,36 @@ const GameApp = {
   },
 
   init() {
+    this.restoreChallengerProfile();
     this.bindEvents();
     this.loadGoalsReference();
+  },
+
+  restoreChallengerProfile() {
+    const savedNickname = localStorage.getItem("sdgs_challenger_nickname");
+    const savedOrg = localStorage.getItem("sdgs_challenger_org");
+    const savedAvatar = localStorage.getItem("sdgs_challenger_avatar");
+    if (savedNickname) {
+      const el = document.getElementById("input-nickname");
+      if (el) el.value = savedNickname;
+      this.state.challenger.nickname = savedNickname;
+    }
+    if (savedOrg) {
+      const el = document.getElementById("input-org");
+      if (el) el.value = savedOrg;
+      this.state.challenger.organization = savedOrg;
+    }
+    if (savedAvatar) {
+      const el = document.getElementById("select-avatar");
+      if (el) el.value = savedAvatar;
+      this.state.challenger.avatar = savedAvatar;
+    }
+  },
+
+  saveChallengerProfile(nickname, org, avatar) {
+    if (nickname) localStorage.setItem("sdgs_challenger_nickname", nickname);
+    if (org !== undefined) localStorage.setItem("sdgs_challenger_org", org);
+    if (avatar) localStorage.setItem("sdgs_challenger_avatar", avatar);
   },
 
   bindEvents() {
@@ -84,7 +112,21 @@ const GameApp = {
     // Start Button
     document.getElementById("btn-start-game").addEventListener("click", () => this.startGame());
 
+    // Auto save profile on input change
+    const nickEl = document.getElementById("input-nickname");
+    const orgEl = document.getElementById("input-org");
+    const avatarEl = document.getElementById("select-avatar");
+    if (nickEl) nickEl.addEventListener("input", (e) => localStorage.setItem("sdgs_challenger_nickname", e.target.value.trim()));
+    if (orgEl) orgEl.addEventListener("input", (e) => localStorage.setItem("sdgs_challenger_org", e.target.value.trim()));
+    if (avatarEl) avatarEl.addEventListener("change", (e) => localStorage.setItem("sdgs_challenger_avatar", e.target.value));
+
     // Navigation buttons
+    const btnNavModes = document.getElementById("btn-nav-modes");
+    if (btnNavModes) btnNavModes.addEventListener("click", () => this.returnToLobby());
+
+    const btnBackModes = document.getElementById("btn-back-modes");
+    if (btnBackModes) btnBackModes.addEventListener("click", () => this.returnToLobby());
+
     document.getElementById("btn-nav-leaderboard").addEventListener("click", () => this.openLeaderboard());
     document.getElementById("btn-nav-handbook").addEventListener("click", () => this.openHandbook());
     document.getElementById("btn-modal-close").addEventListener("click", () => this.closeModal());
@@ -120,6 +162,7 @@ const GameApp = {
     this.state.challenger.nickname = nicknameInput;
     this.state.challenger.organization = document.getElementById("input-org").value.trim() || "一般挑戰者";
     this.state.challenger.avatar = document.getElementById("select-avatar").value || "🌱";
+    this.saveChallengerProfile(this.state.challenger.nickname, this.state.challenger.organization, this.state.challenger.avatar);
 
     // Request start game session from API
     try {

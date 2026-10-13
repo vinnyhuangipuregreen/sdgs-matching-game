@@ -155,10 +155,10 @@ main {
 .card-welcome {
   background: white;
   border-radius: 1rem;
-  padding: 2.5rem 2rem;
+  padding: 2.2rem 1.75rem;
   text-align: center;
   box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-  max-width: 800px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
@@ -175,20 +175,23 @@ main {
 
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem 0;
   text-align: left;
 }
 
 .mode-card {
   border: 2px solid var(--border-color);
   border-radius: 0.75rem;
-  padding: 1.25rem;
+  padding: 0.95rem 0.8rem;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .mode-card:hover {
@@ -200,22 +203,39 @@ main {
 .mode-card.selected {
   border-color: #2563eb;
   background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
 }
 
 .mode-card .mode-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .mode-card h3 {
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   margin-bottom: 0.25rem;
   color: #1e293b;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .mode-card p {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #64748b;
+  line-height: 1.35;
+  margin-bottom: 0.5rem;
+  min-height: 2.6rem;
+}
+
+@media (max-width: 900px) {
+  .mode-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Form Styles */

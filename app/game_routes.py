@@ -302,10 +302,18 @@ def get_leaderboard(mode: Optional[str] = None, limit: int = 20):
     rows = conn.execute(sql, params).fetchall()
     conn.close()
     
+    mode_map = {
+        "scenario": "生活情境入門",
+        "standard": "標準細項配對",
+        "cards": "翻牌記憶連連看",
+        "master169": "169細項極限闖關"
+    }
+
     result = []
     for idx, r in enumerate(rows):
         d = dict(r)
         d["rank"] = idx + 1
         d["accuracy"] = round((d["correct_count"] / d["total_questions"] * 100), 1) if d["total_questions"] > 0 else 0
+        d["mode_zh"] = mode_map.get(d["mode"], d["mode"])
         result.append(d)
     return result

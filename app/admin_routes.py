@@ -226,8 +226,18 @@ def export_csv(session=Depends(verify_admin_token)):
         "總分", "總題數", "答對數", "正確率(%)", "最高連擊",
         "耗時(秒)", "完成時間"
     ])
+    mode_map = {
+        "scenario": "生活情境入門",
+        "standard": "標準細項配對",
+        "cards": "翻牌記憶連連看",
+        "master169": "169細項極限闖關"
+    }
     for r in rows:
-        writer.writerow(list(r))
+        row_list = list(r)
+        # column 3 is mode
+        if len(row_list) > 3 and row_list[3] in mode_map:
+            row_list[3] = mode_map[row_list[3]]
+        writer.writerow(row_list)
 
     output.seek(0)
     response = Response(content=output.getvalue(), media_type="text/csv")

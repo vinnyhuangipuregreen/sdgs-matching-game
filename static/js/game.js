@@ -563,20 +563,125 @@ const GameApp = {
     modal.classList.add("open");
   },
 
-  async openLeaderboard() {
+  MODE_NAMES: {
+    scenario: "生活情境入門",
+    standard: "標準細項配對",
+    cards: "翻牌記憶連連看",
+    master169: "169細項極限闖關"
+  },
+
+  MODE_ICONS: {
+    scenario: "🏡",
+    standard: "🎯",
+    cards: "🃏",
+    master169: "👑"
+  },
+
+  MODE_DESCRIPTIONS: {
+    scenario: "日常生活具體案例與 17 目標直覺配對（例：惜食、節電、淨灘）",
+    standard: "隨機抽取 169 細項具體承諾，精準判斷所屬 17 大核心目標",
+    cards: "經典 16 卡牌翻牌短時記憶，目標卡與細項卡兩兩連線配對",
+    master169: "30 題極限連續高壓測驗，考驗對成果目標與執行方法的透徹度"
+  },
+
+  openLeaderboard(initialMode) {
     const modal = document.getElementById("modal-overlay");
+    const modalCard = modal.querySelector(".modal-card");
     const title = document.getElementById("modal-title");
     const body = document.getElementById("modal-body");
 
+    modalCard.className = "modal-card modal-leaderboard";
     title.innerHTML = "🏆 SDGs 永續英雄排行榜 (Leaderboard)";
     title.style.color = "#1e293b";
 
-    body.innerHTML = `<div style="text-align:center; padding:2rem;">載入中...</div>`;
+    const activeMode = initialMode || this.state.selectedMode || "scenario";
+
+    body.innerHTML = `
+      <!-- 4 大模式切換頁籤 -->
+      <div class="leaderboard-tabs">
+        <button class="leaderboard-tab-btn ${activeMode === 'scenario' ? 'active' : ''}" data-mode="scenario" onclick="GameApp.switchLeaderboardTab('scenario')">
+          🏡 生活情境入門
+        </button>
+        <button class="leaderboard-tab-btn ${activeMode === 'standard' ? 'active' : ''}" data-mode="standard" onclick="GameApp.switchLeaderboardTab('standard')">
+          🎯 標準細項配對
+        </button>
+        <button class="leaderboard-tab-btn ${activeMode === 'cards' ? 'active' : ''}" data-mode="cards" onclick="GameApp.switchLeaderboardTab('cards')">
+          🃏 翻牌記憶連連看
+        </button>
+        <button class="leaderboard-tab-btn ${activeMode === 'master169' ? 'active' : ''}" data-mode="master169" onclick="GameApp.switchLeaderboardTab('master169')">
+          👑 169細項極限闖關
+        </button>
+      </div>
+
+      <!-- 模式介紹提示 -->
+      <div id="leaderboard-mode-desc" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:0.5rem; padding:0.6rem 1rem; margin-bottom:1rem; font-size:0.83rem; color:#475569; display:flex; align-items:center; gap:0.5rem;">
+        <span>${this.MODE_ICONS[activeMode]}</span>
+        <span><strong>${this.MODE_NAMES[activeMode]} 排行榜：</strong>${this.MODE_DESCRIPTIONS[activeMode]}</span>
+      </div>
+
+      <!-- 列表內容區域 -->
+      <div id="leaderboard-tab-content" style="min-height:240px;">
+        <div style="text-align:center; padding:3rem; color:#64748b;">
+          <div style="font-size:2rem; animation:pulse 1s infinite;">🌱</div>
+          <p style="margin-top:0.5rem;">正在讀取 ${this.MODE_NAMES[activeMode]} 排行榜...</p>
+        </div>
+      </div>
+    `;
+
     modal.classList.add("open");
+    this.loadLeaderboardData(activeMode);
+  },
+
+  switchLeaderboardTab(mode) {
+    document.querySelectorAll(".leaderboard-tab-btn").forEach(btn => {
+      if (btn.dataset.mode === mode) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+
+    const descEl = document.getElementById("leaderboard-mode-desc");
+    if (descEl) {
+      descEl.innerHTML = `
+        <span>${this.MODE_ICONS[mode]}</span>
+        <span><strong>${this.MODE_NAMES[mode]} 排行榜：</strong>${this.MODE_DESCRIPTIONS[mode]}</span>
+      `;
+    }
+
+    const contentEl = document.getElementById("leaderboard-tab-content");
+    if (contentEl) {
+      contentEl.innerHTML = `
+        <div style="text-align:center; padding:3rem; color:#64748b;">
+          <div style="font-size:2rem; animation:pulse 1s infinite;">🌱</div>
+          <p style="margin-top:0.5rem;">正在讀取 ${this.MODE_NAMES[mode]} 排行榜...</p>
+        </div>
+      `;
+    }
+
+    this.loadLeaderboardData(mode);
+  },
+
+  async loadLeaderboardData(mode) {
+    const contentEl = document.getElementById("leaderboard-tab-content");
+    if (!contentEl) return;
 
     try {
-      const res = await fetch("/api/game/leaderboard?limit=20");
+      const res = await fetch(`/api/game/leaderboard?mode=${mode}&limit=30`);
       const list = await res.json();
+
+      if (!list || list.length === 0) {
+        contentEl.innerHTML = `
+          <div style="text-align:center; padding:3rem 1rem; color:#64748b; background:#f8fafc; border-radius:0.75rem; border:1px dashed #cbd5e1; margin-top:0.5rem;">
+            <div style="font-size:2.8rem; margin-bottom:0.5rem;">${this.MODE_ICONS[mode]}</div>
+            <h4 style="color:#1e293b; font-size:1.1rem; margin-bottom:0.35rem;">目前「${this.MODE_NAMES[mode]}」模式尚無挑戰紀錄</h4>
+            <p style="font-size:0.85rem; color:#64748b; max-width:400px; margin:0 auto 1.25rem auto;">
+              還沒有挑戰者登上這個排行榜，現在就是搶下全服第一名的最佳時機！
+            </p>
+            <button class="btn btn-primary" style="padding:0.6rem 1.75rem; border-radius:9999px; font-size:0.9rem;" onclick="GameApp.selectModeAndStart('${mode}')">
+              🚀 立即挑戰「${this.MODE_NAMES[mode]}」
+            </button>
+          </div>
+        `;
+        return;
+      }
 
       let rowsHtml = list.map((item, i) => {
         let rankBadge = `${i + 1}`;
@@ -584,41 +689,69 @@ const GameApp = {
         if (i === 1) rankBadge = "🥈 2";
         if (i === 2) rankBadge = "🥉 3";
 
+        const modeZh = this.MODE_NAMES[item.mode] || item.mode;
+
         return `
           <tr>
-            <td><strong>${rankBadge}</strong></td>
-            <td>${item.avatar} <strong>${item.nickname}</strong></td>
-            <td>${item.organization || "-"}</td>
-            <td><span class="target-badge">${item.mode}</span></td>
-            <td><strong style="color:#10b981;">${item.total_score}</strong></td>
-            <td>${item.accuracy}%</td>
-            <td>${item.time_taken_seconds}s</td>
+            <td style="font-size:1rem;"><strong>${rankBadge}</strong></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <span style="font-size:1.2rem;">${item.avatar}</span>
+                <strong style="color:#1e293b;">${item.nickname}</strong>
+              </div>
+            </td>
+            <td style="color:#475569;">${item.organization || "-"}</td>
+            <td><span class="badge-mode-zh mode-${item.mode}">${modeZh}</span></td>
+            <td><strong style="color:#10b981; font-size:1.05rem;">${item.total_score}</strong> 分</td>
+            <td style="font-weight:600; color:#2563eb;">${item.accuracy}%</td>
+            <td><span style="color:#d97706; font-weight:700;">🔥 ${item.combo_max}</span></td>
+            <td style="color:#64748b;">${item.time_taken_seconds} 秒</td>
+            <td style="font-size:0.78rem; color:#94a3b8;">${item.completed_at ? item.completed_at.slice(0, 16) : '-'}</td>
           </tr>
         `;
       }).join("");
 
-      body.innerHTML = `
-        <div class="table-container">
+      contentEl.innerHTML = `
+        <div class="table-container" style="max-height:55vh; overflow-y:auto;">
           <table class="data-table">
             <thead>
               <tr>
-                <th>名次</th>
+                <th style="width:70px;">名次</th>
                 <th>挑戰者</th>
-                <th>組織/學校</th>
+                <th>學校 / 組織</th>
                 <th>模式</th>
-                <th>總分</th>
+                <th>總得分</th>
                 <th>正確率</th>
-                <th>用時</th>
+                <th>最高連擊</th>
+                <th>耗時</th>
+                <th>完成時間</th>
               </tr>
             </thead>
             <tbody>
-              ${rowsHtml || `<tr><td colspan="7" style="text-align:center; padding:1.5rem;">尚未有挑戰紀錄，快來搶下首勝！</td></tr>`}
+              ${rowsHtml}
             </tbody>
           </table>
         </div>
       `;
     } catch (e) {
-      body.innerHTML = `<p style="color:red;">載入排行榜失敗。</p>`;
+      console.error(e);
+      contentEl.innerHTML = `<p style="color:red; text-align:center; padding:2rem;">載入排行榜失敗，請確認網路與服務正常。</p>`;
+    }
+  },
+
+  selectModeAndStart(mode) {
+    this.closeModal();
+    this.returnToLobby();
+    const targetCard = document.querySelector(`.mode-card[data-mode="${mode}"]`);
+    if (targetCard) {
+      document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("selected"));
+      targetCard.classList.add("selected");
+      this.state.selectedMode = mode;
+      targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    const nickEl = document.getElementById("input-nickname");
+    if (nickEl && !nickEl.value.trim()) {
+      nickEl.focus();
     }
   },
 

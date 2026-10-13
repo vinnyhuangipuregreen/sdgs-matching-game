@@ -161,6 +161,13 @@ const AdminApp = {
     }
   },
 
+  MODE_NAMES: {
+    scenario: "生活情境入門",
+    standard: "標準細項配對",
+    cards: "翻牌記憶連連看",
+    master169: "169細項極限闖關"
+  },
+
   async loadRecords(searchQuery = "") {
     try {
       const url = `/api/admin/records?page=1&page_size=30${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`;
@@ -179,7 +186,7 @@ const AdminApp = {
           <td>#${item.id}</td>
           <td>${item.avatar} <strong>${item.nickname}</strong></td>
           <td>${item.organization}</td>
-          <td><span class="badge-mode">${item.mode}</span></td>
+          <td><span class="badge-mode">${AdminApp.MODE_NAMES[item.mode] || item.mode}</span></td>
           <td><strong style="color:#10b981;">${item.total_score}</strong></td>
           <td>${Math.round(item.correct_count * 100 / (item.total_questions || 1))}%</td>
           <td>🔥 ${item.combo_max}</td>

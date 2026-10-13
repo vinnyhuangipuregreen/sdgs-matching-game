@@ -144,15 +144,18 @@ const AdminApp = {
       // Mode stats
       const modeEl = document.getElementById("list-mode-stats");
       if (data.mode_breakdown && data.mode_breakdown.length > 0) {
-        modeEl.innerHTML = data.mode_breakdown.map(item => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.75rem; border-radius:6px; border:1px solid #e2e8f0;">
-            <div>
-              <span class="badge-mode">${item.mode}</span>
-              <span style="font-size:0.85rem; margin-left:0.5rem; color:#334155;">平均得分: <strong>${Math.round(item.avg_score)}</strong></span>
+        modeEl.innerHTML = data.mode_breakdown.map(item => {
+          const modeName = AdminApp.MODE_NAMES[item.mode] || item.mode_zh || item.mode;
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.75rem; border-radius:6px; border:1px solid #e2e8f0;">
+              <div>
+                <span class="badge-mode">${modeName}</span>
+                <span style="font-size:0.85rem; margin-left:0.5rem; color:#334155;">平均得分: <strong>${Math.round(item.avg_score)}</strong></span>
+              </div>
+              <strong style="font-size:1rem; color:#2563eb;">${item.count} 次遊玩</strong>
             </div>
-            <strong style="font-size:1rem; color:#2563eb;">${item.count} 次遊玩</strong>
-          </div>
-        `).join("");
+          `;
+        }).join("");
       } else {
         modeEl.innerHTML = `<p style="color:#64748b; font-size:0.85rem;">暫無對局資料。</p>`;
       }

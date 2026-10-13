@@ -37,10 +37,20 @@ def get_admin_stats(session=Depends(verify_admin_token)):
     FROM game_sessions WHERE total_questions > 0
     """).fetchone()[0]
 
-    mode_counts = [dict(r) for r in conn.execute("""
-    SELECT mode, COUNT(*) as count, AVG(total_score) as avg_score
-    FROM game_sessions WHERE total_score > 0 GROUP BY mode
-    """).fetchall()]
+    mode_map = {
+        "scenario": "生活情境入門",
+        "standard": "標準細項配對",
+        "cards": "翻牌記憶連連看",
+        "master169": "169細項極限闖關"
+    }
+    mode_counts = []
+    for r in conn.execute("""
+        SELECT mode, COUNT(*) as count, AVG(total_score) as avg_score
+        FROM game_sessions WHERE total_score > 0 GROUP BY mode
+    """).fetchall():
+        d = dict(r)
+        d["mode_zh"] = mode_map.get(d["mode"], d["mode"])
+        mode_counts.append(d)
 
     most_mistaken = [dict(r) for r in conn.execute("""
     SELECT t.code, t.description, g.name as goal_name, g.color,

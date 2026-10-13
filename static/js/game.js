@@ -624,39 +624,243 @@ const GameApp = {
 
   async openHandbook() {
     const modal = document.getElementById("modal-overlay");
+    const modalCard = modal.querySelector(".modal-card");
     const title = document.getElementById("modal-title");
     const body = document.getElementById("modal-body");
 
-    title.innerHTML = "📖 SDGs 17項目標與169項細項學習手冊";
-    body.innerHTML = `<div style="text-align:center; padding:2rem;">載入百科知識庫...</div>`;
+    modalCard.classList.add("modal-handbook");
+    title.innerHTML = "📖 SDGs 17項目標 × 169項細項目標 官方學習手冊";
+    title.style.color = "#1e3a8a";
+
+    body.innerHTML = `<div style="text-align:center; padding:3rem;"><div style="font-size:2rem; animation:pulse 1s infinite;">🌱</div><p style="margin-top:0.5rem; color:#64748b;">正在載入 17 項目標與 169 項細項完整知識庫...</p></div>`;
     modal.classList.add("open");
 
     try {
-      const res = await fetch("/api/game/goals");
-      const goals = await res.json();
+      const res = await fetch("/api/game/handbook");
+      const data = await res.json();
+      this.handbookData = data;
+      this.renderHandbookContent(data);
+    } catch (e) {
+      console.error(e);
+      body.innerHTML = `<p style="color:red; text-align:center; padding:2rem;">載入失敗，請確認後端服務正常運作。</p>`;
+    }
+  },
 
-      let goalsHtml = goals.map(g => `
-        <div style="border-left: 4px solid ${g.color}; background:#f8fafc; border-radius:8px; padding:0.75rem 1rem; margin-bottom:0.75rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h4 style="color:${g.color}; font-size:1rem;">${g.code} ${g.name}</h4>
-            <span style="font-size:0.75rem; background:#e2e8f0; padding:2px 6px; border-radius:4px;">${g.category_zh}領域</span>
+  renderHandbookContent(data, filterCategory = "all", searchQuery = "") {
+    const body = document.getElementById("modal-body");
+    const goals = data.goals;
+
+    // Quick navigation badges (1-17)
+    const quickNavHtml = goals.map(g => `
+      <button class="quick-sdg-btn" style="background:${g.color};" onclick="GameApp.scrollToGoal(${g.id})" title="SDG ${g.id} ${g.name}">
+        ${g.id}
+      </button>
+    `).join("");
+
+    // Filter goals
+    let filteredGoals = goals;
+    if (filterCategory !== "all") {
+      filteredGoals = filteredGoals.filter(g => g.category.toLowerCase() === filterCategory.toLowerCase() || g.category_zh === filterCategory);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      filteredGoals = filteredGoals.filter(g => {
+        const inGoal = g.name.toLowerCase().includes(q) || g.full_name.toLowerCase().includes(q) || (g.slogan && g.slogan.toLowerCase().includes(q));
+        const inOutcomes = g.outcome_targets.some(t => t.code.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+        const inMeans = g.means_targets.some(t => t.code.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+        return inGoal || inOutcomes || inMeans;
+      });
+    }
+
+    const goalsHtml = filteredGoals.map(g => {
+      // Filter targets if search active
+      let outcomes = g.outcome_targets;
+      let means = g.means_targets;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase().trim();
+        outcomes = outcomes.filter(t => t.code.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+        means = means.filter(t => t.code.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+      }
+
+      const outcomeItemsHtml = outcomes.map(t => `
+        <div class="handbook-target-card">
+          <div class="target-num-badge" style="background:${g.color};">${t.code}</div>
+          <div class="target-content">
+            <span class="target-tag-outcome">成果目標 (要達成什麼)</span>
+            <div class="target-desc-text">${t.description}</div>
           </div>
-          <p style="font-size:0.85rem; color:#334155; margin-top:4px;">${g.full_name}</p>
-          ${g.slogan ? `<p style="font-size:0.8rem; color:#64748b; margin-top:2px;"><em>💡 ${g.slogan} (${g.example})</em></p>` : ''}
         </div>
       `).join("");
 
-      body.innerHTML = `
-        <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">
-          聯合國 2030 永續發展目標包含 17 項核心目標與 169 項具體細項目標，核心精神為「不遺漏任何人」。
-        </p>
-        <div style="max-height:60vh; overflow-y:auto;">
-          ${goalsHtml}
+      const meansItemsHtml = means.map(t => `
+        <div class="handbook-target-card">
+          <div class="target-num-badge" style="background:#e11d48;">${t.code}</div>
+          <div class="target-content">
+            <span class="target-tag-means">執行方法 (資金/技術/政策)</span>
+            <div class="target-desc-text">${t.description}</div>
+          </div>
+        </div>
+      `).join("");
+
+      return `
+        <div class="handbook-goal-card" id="goal-anchor-${g.id}" style="border-left: 6px solid ${g.color};">
+          <div class="handbook-goal-header" onclick="GameApp.toggleGoalCollapse(${g.id})">
+            <div class="handbook-goal-title">
+              <div style="font-size:1.6rem; min-width:32px; text-align:center;">${g.icon || "🎯"}</div>
+              <div>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                  <h3 style="color:${g.color}; font-size:1.15rem; font-weight:700; margin:0;">SDG ${g.id} ${g.name}</h3>
+                  <span class="handbook-badge-5p">${g.category_zh}領域 (${g.category})</span>
+                  <span style="font-size:0.75rem; background:#eff6ff; color:#1d4ed8; padding:2px 8px; border-radius:4px; font-weight:700;">共 ${g.targets_count} 項細項</span>
+                </div>
+                <div style="font-size:0.85rem; color:#475569; margin-top:3px;">${g.full_name}</div>
+                ${g.slogan ? `<div style="font-size:0.78rem; color:#64748b; margin-top:2px;">💡 生活實踐指標：${g.slogan} (${g.example})</div>` : ''}
+              </div>
+            </div>
+            <div id="toggle-icon-${g.id}" style="font-size:1.2rem; color:#94a3b8; font-weight:bold;">▼</div>
+          </div>
+
+          <div id="goal-body-${g.id}">
+            <!-- 成果目標區塊 -->
+            ${outcomes.length > 0 ? `
+              <div class="handbook-section-title" style="color:#166534;">
+                <span>🎯</span> <strong>要達成什麼（成果目標 - 數字編號）</strong>
+                <span style="font-size:0.72rem; color:#64748b; font-weight:normal; margin-left:auto;">${outcomes.length} 項</span>
+              </div>
+              <div class="handbook-target-list">
+                ${outcomeItemsHtml}
+              </div>
+            ` : ''}
+
+            <!-- 執行方法區塊 -->
+            ${means.length > 0 ? `
+              <div class="handbook-section-title" style="color:#9f1239;">
+                <span>🛠️</span> <strong>怎麼達成（執行方法 - 字母編號，如資金/技術/能力建構）</strong>
+                <span style="font-size:0.72rem; color:#64748b; font-weight:normal; margin-left:auto;">${means.length} 項</span>
+              </div>
+              <div class="handbook-target-list">
+                ${meansItemsHtml}
+              </div>
+            ` : ''}
+
+            ${(outcomes.length === 0 && means.length === 0) ? `
+              <div style="padding:1rem; text-align:center; color:#94a3b8; font-size:0.85rem;">無符合搜尋關鍵字之細項</div>
+            ` : ''}
+          </div>
         </div>
       `;
-    } catch (e) {
-      body.innerHTML = `<p style="color:red;">載入資料庫失敗。</p>`;
+    }).join("");
+
+    body.innerHTML = `
+      <!-- 教材導讀與說明 -->
+      <div class="handbook-guide-box">
+        <div style="font-weight:700; font-size:0.92rem; margin-bottom:0.35rem; display:flex; align-items:center; gap:0.4rem;">
+          <span>📘</span> 怎麼讀這份資料（教材重點延伸）：
+        </div>
+        <p style="margin-bottom:0.25rem;">
+          每個目標底下的細項分成兩種：<strong>數字編號（如 13.1、13.2）</strong>是<strong>「要達成什麼」的成果目標</strong>；
+          <strong>英文字母編號（如 13.a、13.b）</strong>是<strong>「怎麼達成」的執行方法</strong>，例如資金、技術與能力建構。
+        </p>
+        <p style="margin-bottom:0.25rem;">
+          細項的期限多數是 2030 年，少數寫著 2020 年或 2025 年，代表當年設定的階段目標，已經到期。<strong>17 個目標是方向，169 項細項才是可以檢核的具體承諾。</strong>
+        </p>
+        <div style="margin-top:0.4rem; font-size:0.8rem; color:#047857; font-weight:600;">
+          5P 對照：人 People（1–5）｜地球 Planet（6、12–15）｜繁榮 Prosperity（7–11）｜和平 Peace（16）｜夥伴 Partnership（17）
+        </div>
+      </div>
+
+      <!-- 快速導覽列 (1~17 SDGs 色彩按鈕) -->
+      <div style="margin-bottom:0.75rem;">
+        <div style="font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:0.35rem;">⚡ 快速跳轉至指定目標：</div>
+        <div class="handbook-quick-nav">
+          ${quickNavHtml}
+        </div>
+      </div>
+
+      <!-- 工具列：搜尋與 5P 篩選 -->
+      <div class="handbook-tools-bar">
+        <div style="display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap;">
+          <span style="font-size:0.78rem; font-weight:700; color:#475569;">5P 領域：</span>
+          <button class="handbook-filter-btn ${filterCategory === 'all' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('all')">全部 (17)</button>
+          <button class="handbook-filter-btn ${filterCategory === '人' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('人')">人 People (1-5)</button>
+          <button class="handbook-filter-btn ${filterCategory === '地球' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('地球')">地球 Planet (6,12-15)</button>
+          <button class="handbook-filter-btn ${filterCategory === '繁榮' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('繁榮')">繁榮 Prosperity (7-11)</button>
+          <button class="handbook-filter-btn ${filterCategory === '和平' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('和平')">和平 Peace (16)</button>
+          <button class="handbook-filter-btn ${filterCategory === '夥伴' ? 'active' : ''}" onclick="GameApp.setHandbookFilter('夥伴')">夥伴 Partnership (17)</button>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <input type="text" id="handbook-search-input" class="form-input" style="padding:0.35rem 0.75rem; width:180px; font-size:0.82rem;" placeholder="搜尋細項條文或編號..." value="${searchQuery}">
+          <button class="btn btn-outline" style="padding:0.35rem 0.65rem; font-size:0.75rem; border-color:#cbd5e1; color:#475569;" onclick="GameApp.toggleAllGoals()">全部折疊/展開</button>
+        </div>
+      </div>
+
+      <!-- 17 目標與 169 細項內容列表 -->
+      <div style="max-height: 56vh; overflow-y: auto; padding-right: 0.25rem;">
+        ${goalsHtml || `<div style="text-align:center; padding:2rem; color:#64748b;">無符合篩選條件之目標細項。</div>`}
+
+        <!-- 頁尾教材資料說明 -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:0.5rem; padding:1rem; margin-top:1.5rem; font-size:0.78rem; color:#64748b; line-height:1.55;">
+          <strong>資料說明：</strong>${data.source_notes}
+          <div style="margin-top:0.35rem; color:#94a3b8;">
+            課程資訊：SDGs 與氣候行動：17個目標如何連動｜佛光永續學院 × 佛光大學應用科技與設計學院｜講師：戴慶華 Dr. ANDERSON
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Bind real-time search input
+    const searchInput = document.getElementById("handbook-search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        this.debounce(() => {
+          this.renderHandbookContent(this.handbookData, filterCategory, e.target.value);
+        }, 300);
+      });
     }
+  },
+
+  setHandbookFilter(category) {
+    const searchInput = document.getElementById("handbook-search-input");
+    const q = searchInput ? searchInput.value : "";
+    this.renderHandbookContent(this.handbookData, category, q);
+  },
+
+  scrollToGoal(goalId) {
+    const el = document.getElementById(`goal-anchor-${goalId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.4)";
+      setTimeout(() => el.style.boxShadow = "0 2px 5px rgba(0,0,0,0.03)", 1500);
+    }
+  },
+
+  toggleGoalCollapse(goalId) {
+    const body = document.getElementById(`goal-body-${goalId}`);
+    const icon = document.getElementById(`toggle-icon-${goalId}`);
+    if (body) {
+      const isHidden = body.style.display === "none";
+      body.style.display = isHidden ? "block" : "none";
+      if (icon) icon.innerText = isHidden ? "▼" : "▶";
+    }
+  },
+
+  toggleAllGoals() {
+    this.handbookAllCollapsed = !this.handbookAllCollapsed;
+    this.handbookData.goals.forEach(g => {
+      const body = document.getElementById(`goal-body-${g.id}`);
+      const icon = document.getElementById(`toggle-icon-${g.id}`);
+      if (body) {
+        body.style.display = this.handbookAllCollapsed ? "none" : "block";
+        if (icon) icon.innerText = this.handbookAllCollapsed ? "▶" : "▼";
+      }
+    });
+  },
+
+  debounceTimer: null,
+  debounce(func, wait) {
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(func, wait);
   },
 
   returnToLobby() {

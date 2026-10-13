@@ -6,6 +6,48 @@ from app.models import GameStartRequest, GameAnswerRequest, GameFinishRequest
 
 router = APIRouter(prefix="/api/game", tags=["game"])
 
+@router.get("/handbook")
+def get_handbook_data():
+    conn = get_db_connection()
+    goals = [dict(g) for g in conn.execute("SELECT * FROM goals ORDER BY id ASC").fetchall()]
+    targets = [dict(t) for t in conn.execute("SELECT * FROM targets ORDER BY goal_id ASC, id ASC").fetchall()]
+    conn.close()
+
+    targets_by_goal = {}
+    for t in targets:
+        gid = t["goal_id"]
+        if gid not in targets_by_goal:
+            targets_by_goal[gid] = {"outcomes": [], "means": []}
+        if t.get("is_means") == 1:
+            targets_by_goal[gid]["means"].append(t)
+        else:
+            targets_by_goal[gid]["outcomes"].append(t)
+
+    result_goals = []
+    for g in goals:
+        gid = g["id"]
+        t_data = targets_by_goal.get(gid, {"outcomes": [], "means": []})
+        g_item = dict(g)
+        g_item["outcome_targets"] = t_data["outcomes"]
+        g_item["means_targets"] = t_data["means"]
+        g_item["targets_count"] = len(t_data["outcomes"]) + len(t_data["means"])
+        result_goals.append(g_item)
+
+    return {
+        "title": "SDGs 17項目標 × 169項細項目標",
+        "subtitle": "SDGs 與氣候行動：17個目標如何連動｜佛光永續學院 × 佛光大學應用科技與設計學院｜講師：戴慶華 Dr. ANDERSON",
+        "guide": "每個目標底下的細項分成兩種。數字編號（如 13.1、13.2）是「要達成什麼」的成果目標；英文字母編號（如 13.a、13.b）是「怎麼達成」的執行方法，例如資金、技術與能力建構。細項的期限多數是2030年，少數寫著2020年或2025年，代表當年設定的階段目標，已經到期。17個目標是方向，169項細項才是可以檢核的具體承諾。",
+        "classification_5p": {
+            "People": {"name": "人", "goals": [1, 2, 3, 4, 5]},
+            "Planet": {"name": "地球", "goals": [6, 12, 13, 14, 15]},
+            "Prosperity": {"name": "繁榮", "goals": [7, 8, 9, 10, 11]},
+            "Peace": {"name": "和平", "goals": [16]},
+            "Partnership": {"name": "夥伴", "goals": [17]}
+        },
+        "source_notes": "目標名稱與目標全文依「全球目標 Global Goals 台灣中文網」（globalgoals.tw）。細項中文譯文沿用2025年課程教材版本，2.2 與 17.10 原教材缺漏取自 globalgoals.tw。各細項以聯合國官網為準：sdgs.un.org/goals；台灣版本可參考行政院國家永續發展委員會「臺灣永續發展目標」：ncsd.ndc.gov.tw。",
+        "goals": result_goals
+    }
+
 @router.get("/goals")
 def get_all_goals():
     conn = get_db_connection()

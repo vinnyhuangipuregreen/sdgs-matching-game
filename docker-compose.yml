@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  sdgs-game:
+    build: .
+    container_name: sdgs-matching-game
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    restart: unless-stopped

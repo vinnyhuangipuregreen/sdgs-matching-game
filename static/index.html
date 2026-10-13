@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDGs 17項目標 × 169項細項配對挑戰賽</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">🌍</div>
+      <div class="logo-title">
+        <h1>SDGs 17項目標 × 169項細項 配對挑戰</h1>
+        <p>聯合國永續發展目標 · 互動式知識學習與連連看遊戲</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button id="btn-nav-handbook" class="btn btn-outline">📖 學習手冊</button>
+      <button id="btn-nav-leaderboard" class="btn btn-outline">🏆 即時排行</button>
+      <a href="/admin" class="btn btn-secondary">⚙️ 管理後台</a>
+    </div>
+  </header>
+
+  <!-- Official 17 SDGs Rainbow Bar -->
+  <div class="sdg-rainbow-bar">
+    <span style="background:var(--sdg-1);"></span>
+    <span style="background:var(--sdg-2);"></span>
+    <span style="background:var(--sdg-3);"></span>
+    <span style="background:var(--sdg-4);"></span>
+    <span style="background:var(--sdg-5);"></span>
+    <span style="background:var(--sdg-6);"></span>
+    <span style="background:var(--sdg-7);"></span>
+    <span style="background:var(--sdg-8);"></span>
+    <span style="background:var(--sdg-9);"></span>
+    <span style="background:var(--sdg-10);"></span>
+    <span style="background:var(--sdg-11);"></span>
+    <span style="background:var(--sdg-12);"></span>
+    <span style="background:var(--sdg-13);"></span>
+    <span style="background:var(--sdg-14);"></span>
+    <span style="background:var(--sdg-15);"></span>
+    <span style="background:var(--sdg-16);"></span>
+    <span style="background:var(--sdg-17);"></span>
+  </div>
+
+  <main>
+    <!-- View 1: Welcome & Setup -->
+    <section id="view-welcome" class="view-section active">
+      <div class="card-welcome">
+        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #1e3a8a;">🌱 永續發展目標 配對大挑戰</h2>
+        <p style="color: #64748b; font-size: 0.95rem; max-width: 600px; margin: 0 auto 1.5rem auto;">
+          探索聯合國 2030 永續發展 17 大目標與 169 項具體細項！透過直覺配對與連擊加分機制，測驗你的永續知識，並將榮譽登上全服排行榜！
+        </p>
+
+        <!-- Challenger Profile Form -->
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; border: 1px solid var(--border-color); max-width: 600px; margin: 0 auto 1.5rem auto;">
+          <h3 style="font-size: 1rem; color: #334155; margin-bottom: 1rem; text-align: left;">👤 挑戰者基本資料登錄</h3>
+          <div style="display: grid; grid-template-columns: 80px 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="select-avatar">頭像</label>
+              <select id="select-avatar" class="form-input" style="padding: 0.7rem 0.5rem; font-size: 1.2rem;">
+                <option value="🌱">🌱</option>
+                <option value="🌟">🌟</option>
+                <option value="🌍">🌍</option>
+                <option value="🐬">🐬</option>
+                <option value="🌳">🌳</option>
+                <option value="🎓">🎓</option>
+                <option value="☀️">☀️</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="input-nickname">挑戰者暱稱 *</label>
+              <input type="text" id="input-nickname" class="form-input" placeholder="例如：綠色小先鋒" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="input-org">學校 / 所屬組織</label>
+              <input type="text" id="input-org" class="form-input" placeholder="例如：永續小學5年1班">
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Selection -->
+        <h3 style="font-size: 1.1rem; color: #1e293b; margin-top: 1.5rem; text-align: left;">🎮 選擇挑戰模式</h3>
+        <div class="mode-grid">
+          <div class="mode-card" data-mode="scenario">
+            <div class="mode-icon">🏡</div>
+            <h3>生活情境入門</h3>
+            <p>日常生動案例與 17 目標連結（如惜食、節電、淨灘）</p>
+            <span style="font-size:0.75rem; color:#059669; font-weight:700;">★☆☆ 適合初學者</span>
+          </div>
+          <div class="mode-card selected" data-mode="standard">
+            <div class="mode-icon">🎯</div>
+            <h3>標準細項配對</h3>
+            <p>隨機抽取 169 細項，精準配對至所屬 17 大目標</p>
+            <span style="font-size:0.75rem; color:#2563eb; font-weight:700;">★★☆ 核心標準賽</span>
+          </div>
+          <div class="mode-card" data-mode="cards">
+            <div class="mode-icon">🃏</div>
+            <h3>翻牌記憶連連看</h3>
+            <p>經典 16 卡牌翻牌記憶模式，比速度與短時記憶</p>
+            <span style="font-size:0.75rem; color:#d97706; font-weight:700;">★★☆ 趣味互動賽</span>
+          </div>
+          <div class="mode-card" data-mode="master169">
+            <div class="mode-icon">👑</div>
+            <h3>169細項極限闖關</h3>
+            <p>30 題高壓極速挑戰，考驗對成果目標與執行方法的熟悉度</p>
+            <span style="font-size:0.75rem; color:#dc2626; font-weight:700;">★★★ 專家大師賽</span>
+          </div>
+        </div>
+
+        <button id="btn-start-game" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.85rem 2.5rem; border-radius: 9999px;">
+          🚀 開始挑戰配對！
+        </button>
+      </div>
+    </section>
+
+    <!-- View 2: Gameplay Dashboard -->
+    <section id="view-gameplay" class="view-section">
+      <!-- Status Top Bar -->
+      <div class="game-status-bar">
+        <div class="status-item">
+          <span class="status-label">目前挑戰者</span>
+          <span id="display-challenger" class="status-value" style="font-size: 1.1rem;">🌱 選手</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">累積得分</span>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span id="display-score" class="status-value" style="color: #10b981;">0</span>
+            <span id="display-combo" class="combo-badge" style="display:none;">🔥 2 連擊</span>
+          </div>
+        </div>
+        <div class="status-item timer-box">
+          <span class="status-label">剩餘時間 <span id="timer-seconds" style="font-weight:700; color:#334155;">20s</span></span>
+          <div class="timer-bar-container">
+            <div id="timer-bar" class="timer-bar"></div>
+          </div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">進度</span>
+          <span id="display-progress" class="status-value" style="font-size: 1.1rem;">1 / 10</span>
+        </div>
+      </div>
+
+      <!-- Standard & Scenario Question Board -->
+      <div id="standard-board">
+        <div class="question-panel">
+          <div id="question-badge" class="target-badge">細項 13.1 · 成果目標</div>
+          <div id="question-text" class="question-text">
+            強化各國對氣候變遷、大浩劫、自然災害的抵禦和適應力。
+          </div>
+          <div id="question-extra" class="question-extra" style="display:none;"></div>
+        </div>
+
+        <!-- 4 Options Grid -->
+        <div id="options-grid" class="options-grid"></div>
+      </div>
+
+      <!-- Cards Memory Match Board -->
+      <div id="cards-board" class="cards-board" style="display:none;"></div>
+    </section>
+  </main>
+
+  <!-- Universal Modal Dialog -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title" style="font-size: 1.25rem;">詳細資訊</h3>
+        <button id="btn-modal-close" class="modal-close">&times;</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>SDGs 17項目標 × 169項細項目標 配對系統 · 依據「全球目標 Global Goals 台灣中文網」與聯合國官方指標規範</p>
+    <p style="margin-top: 4px;">支援完整資料庫存儲、後台管理、GitHub 開源部署</p>
+  </footer>
+
+  <script src="/static/js/game.js"></script>
+</body>
+</html>

@@ -78,6 +78,9 @@ class TursoCursor:
 
     def execute(self, sql, params=()):
         result = self.conn._execute_remote(sql, params)
+        return self._load_result(result)
+
+    def _load_result(self, result):
         cols = [c.get("name", f"col_{i}") for i, c in enumerate(result.get("cols", []))]
         self.description = [(name, None, None, None, None, None, None) for name in cols]
 
@@ -226,7 +229,9 @@ class TursoConnection:
             "condition": {"type": "not", "cond": {"type": "ok", "step": len(steps) - 1}},
             "stmt": {"sql": "ROLLBACK"},
         })
-        self._execute_pipeline([{"type": "batch", "batch": {"steps": steps}}])
+        responses = self._execute_pipeline([{"type": "batch", "batch": {"steps": steps}}])
+        results = responses[0]["response"]["result"]["step_results"][1:-2]
+        return [TursoCursor(self)._load_result(result) for result in results]
 
     def _execute_remote(self, sql, params=()):
         args = [self._format_arg(p) for p in params]

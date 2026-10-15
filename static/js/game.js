@@ -60,6 +60,7 @@ const GameApp = {
     timer: null,
     timePerQuestion: 20,
     timeRemaining: 20,
+    answerPending: false,
     isCardMode: false,
     cardFlipped: [],
     cardMatchedCount: 0,
@@ -224,6 +225,7 @@ const GameApp = {
 
   renderQuestion() {
     clearInterval(this.state.timer);
+    this.state.answerPending = false;
     const q = this.state.questions[this.state.currentIndex];
     if (!q) {
       this.finishGame();
@@ -304,9 +306,20 @@ const GameApp = {
   },
 
   async handleOptionClick(btnEl, selectedGoalId, question) {
+    if (this.state.answerPending) return;
+    this.state.answerPending = true;
+    const sessionId = this.state.sessionId;
+    const questionIndex = this.state.currentIndex;
+    const isCurrentQuestion = () => this.state.sessionId === sessionId
+      && this.state.currentIndex === questionIndex
+      && document.getElementById("view-gameplay").classList.contains("active");
     clearInterval(this.state.timer);
     // Disable all options
     document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+    btnEl.classList.add("pending");
+    btnEl.setAttribute("aria-busy", "true");
+    const label = btnEl.querySelector(".opt-details p");
+    label.textContent = "已選擇，正在判定…";
 
     const timeSpent = (this.state.timePerQuestion - this.state.timeRemaining) * 1000;
 
@@ -325,7 +338,12 @@ const GameApp = {
           current_combo: this.state.combo
         })
       });
+      if (!res.ok) throw new Error(`Answer request failed: ${res.status}`);
       const data = await res.json();
+      if (!isCurrentQuestion()) return;
+      btnEl.classList.remove("pending");
+      btnEl.removeAttribute("aria-busy");
+      label.textContent = data.is_correct ? "配對成功！" : "配對錯誤";
 
       if (data.is_correct) {
         btnEl.classList.add("correct");
@@ -355,12 +373,12 @@ const GameApp = {
 
       // Show brief feedback and next question
       setTimeout(() => {
-        this.showExplanationModal(data);
-      }, 700);
+        if (isCurrentQuestion()) this.showExplanationModal(data);
+      }, 250);
 
     } catch (e) {
       console.error(e);
-      this.nextQuestion();
+      if (isCurrentQuestion()) this.nextQuestion();
     }
   },
 

@@ -1,7 +1,7 @@
 import random
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.database import get_db_connection
+from app.database import get_db_connection, TursoConnection
 from app.models import GameStartRequest, GameAnswerRequest, GameFinishRequest
 
 router = APIRouter(prefix="/api/game", tags=["game"])
@@ -187,11 +187,31 @@ def start_game(req: GameStartRequest):
 @router.post("/answer")
 def check_answer(req: GameAnswerRequest):
     conn = get_db_connection()
-    cursor = conn.cursor()
-
     is_correct = (req.selected_goal_id == req.correct_goal_id)
 
-    settings = dict(cursor.execute("SELECT key, value FROM system_settings").fetchall())
+    statements = [
+        ("SELECT key, value FROM system_settings", ()),
+        ("""
+            INSERT INTO game_details (session_id, target_id, goal_id, selected_goal_id, is_correct, time_spent_ms)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (req.session_id, req.target_id, req.correct_goal_id, req.selected_goal_id, int(is_correct), req.time_spent_ms)),
+        ("SELECT * FROM goals WHERE id = ?", (req.correct_goal_id,)),
+    ]
+    if req.target_id:
+        statements.append(("SELECT * FROM targets WHERE id = ?", (req.target_id,)))
+    try:
+        if isinstance(conn, TursoConnection):
+            results = conn.execute_batch(statements)
+        else:
+            results = [conn.execute(sql, params) for sql, params in statements]
+            conn.commit()
+        settings = dict(results[0].fetchall())
+        correct_goal = dict(results[2].fetchone())
+        target_row = results[3].fetchone() if req.target_id else None
+        target_info = dict(target_row) if target_row else None
+    finally:
+        conn.close()
+
     base_points = int(settings.get("points_base", 100))
     combo_bonus = int(settings.get("points_combo_bonus", 25))
     penalty = int(settings.get("points_penalty_wrong", 20))
@@ -204,21 +224,6 @@ def check_answer(req: GameAnswerRequest):
     else:
         new_combo = 0
         score_delta = -penalty
-
-    cursor.execute("""
-    INSERT INTO game_details (session_id, target_id, goal_id, selected_goal_id, is_correct, time_spent_ms)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, (req.session_id, req.target_id, req.correct_goal_id, req.selected_goal_id, 1 if is_correct else 0, req.time_spent_ms))
-
-    correct_goal = dict(cursor.execute("SELECT * FROM goals WHERE id = ?", (req.correct_goal_id,)).fetchone())
-    target_info = None
-    if req.target_id:
-        target_row = cursor.execute("SELECT * FROM targets WHERE id = ?", (req.target_id,)).fetchone()
-        if target_row:
-            target_info = dict(target_row)
-
-    conn.commit()
-    conn.close()
 
     return {
         "is_correct": is_correct,

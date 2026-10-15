@@ -373,9 +373,20 @@ main {
   overflow: hidden;
 }
 
-.option-btn:hover {
+.option-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+}
+
+.option-btn:disabled {
+  cursor: default;
+}
+
+.option-btn.pending {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  cursor: progress;
 }
 
 .option-btn .opt-icon {

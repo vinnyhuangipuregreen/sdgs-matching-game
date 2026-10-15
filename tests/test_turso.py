@@ -129,6 +129,34 @@ class TestTursoAPI(test_api.TestSDGsGameAPI):
             ])
         self.assertIsNone(conn.execute("SELECT value FROM system_settings WHERE key = 'rollback_test'").fetchone())
 
+    def test_answer_uses_one_round_trip_and_current_settings(self):
+        started = self.client.post('/api/game/start', json={'nickname': 'latency-test', 'mode': 'standard', 'question_count': 1}).json()
+        question = started['questions'][0]
+        conn = database.get_db_connection()
+        conn.execute("UPDATE system_settings SET value = '137' WHERE key = 'points_base'")
+        payload = {
+            'session_id': started['session_id'], 'question_index': 0,
+            'target_id': question['target_id'], 'selected_goal_id': question['correct_goal_id'],
+            'correct_goal_id': question['correct_goal_id'], 'current_combo': 1,
+        }
+        try:
+            with patch('urllib.request.urlopen', wraps=self.server.urlopen) as requests:
+                response = self.client.post('/api/game/answer', json=payload)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['score_delta'], 162)
+            self.assertEqual(response.json()['target']['id'], question['target_id'])
+            self.assertEqual(requests.call_count, 1)
+            payload.update(target_id=None, selected_goal_id=1 if question['correct_goal_id'] != 1 else 2)
+            with patch('urllib.request.urlopen', wraps=self.server.urlopen) as requests:
+                response = self.client.post('/api/game/answer', json=payload)
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(response.json()['is_correct'])
+            self.assertEqual(response.json()['score_delta'], -20)
+            self.assertIsNone(response.json()['target'])
+            self.assertEqual(requests.call_count, 1)
+        finally:
+            conn.execute("UPDATE system_settings SET value = '100' WHERE key = 'points_base'")
+
     def test_foreign_keys_and_cascade(self):
         conn = database.get_db_connection()
         with self.assertRaises(RuntimeError):

@@ -118,6 +118,7 @@ sdgs-matching-game/
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python -m unittest discover -v
+node --test tests/test_game_client.cjs
 .\.venv\Scripts\python main.py
 ```
 

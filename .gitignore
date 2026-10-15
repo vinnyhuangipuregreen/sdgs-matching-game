@@ -5,6 +5,11 @@ __pycache__/
 *.db
 *.sqlite3
 .env
+.env.*
+!.env.example
+.vercel/
+dist/
+*.zip
 .venv
 env/
 venv/

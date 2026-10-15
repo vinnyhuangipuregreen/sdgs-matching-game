@@ -3,8 +3,8 @@ import secrets
 import time
 from typing import Optional
 from fastapi import Header, Query, HTTPException, status
+from app.database import get_db_connection
 
-ADMIN_SESSIONS = {}
 SESSION_DURATION_SECONDS = 86400
 
 def hash_password(password: str) -> str:
@@ -15,11 +15,16 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_admin_session(username: str, role: str = "admin") -> str:
     token = secrets.token_hex(24)
-    ADMIN_SESSIONS[token] = {
-        "username": username,
-        "role": role,
-        "expires_at": time.time() + SESSION_DURATION_SECONDS
-    }
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (time.time(),))
+        conn.execute(
+            "INSERT INTO admin_sessions (token_hash, username, role, expires_at) VALUES (?, ?, ?, ?)",
+            (hash_password(token), username, role, time.time() + SESSION_DURATION_SECONDS),
+        )
+        conn.commit()
+    finally:
+        conn.close()
     return token
 
 def verify_admin_token(
@@ -39,16 +44,17 @@ def verify_admin_token(
             detail="缺少管理員認證標頭 (Missing Authorization header)"
         )
 
-    session = ADMIN_SESSIONS.get(raw_token)
+    conn = get_db_connection()
+    try:
+        session = conn.execute(
+            "SELECT username, role, expires_at FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
+            (hash_password(raw_token), time.time()),
+        ).fetchone()
+    finally:
+        conn.close()
     if not session:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="無效或已過期的管理員憑證 (Invalid or expired admin token)"
         )
-    if time.time() > session["expires_at"]:
-        del ADMIN_SESSIONS[raw_token]
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="管理員憑證已過期，請重新登入 (Admin session expired)"
-        )
-    return session
+    return dict(session)

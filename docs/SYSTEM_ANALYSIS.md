@@ -1,6 +1,9 @@
 # SDGs 17項目標 × 169項細項目標 配對遊戲系統
 ## 完整系統分析與設計規格書 (System Analysis & Design Specification)
 
+> 2026-10-15 部署更新：正式環境改採 Vercel FastAPI 與 Turso；管理員憑證存於資料庫的 `admin_sessions`。
+> 以下為原始功能規格，涉及本機 SQLite、部署方式或效能目標的描述請配合 [目前部署文件](DEPLOY_VERCEL_TURSO.md) 閱讀；效能目標不是雲端量測結果。
+
 ---
 
 ### 版本資訊 (Document Revision History)

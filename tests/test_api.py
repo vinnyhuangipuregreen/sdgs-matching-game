@@ -1,16 +1,28 @@
 import unittest
+import os
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 
 class TestSDGsGameAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        cls.env_patch = patch.dict(os.environ, {"TURSO_DATABASE_URL": "", "TURSO_AUTH_TOKEN": "", "VERCEL": "", "SDGS_ADMIN_PASSWORD": ""})
+        cls.env_patch.start()
+        cls.db_patch = patch("app.database.DB_PATH", Path(cls.temp.name) / "test.db")
+        cls.db_patch.start()
         cls.client_cm = TestClient(app)
         cls.client = cls.client_cm.__enter__()
 
     @classmethod
     def tearDownClass(cls):
         cls.client_cm.__exit__(None, None, None)
+        cls.db_patch.stop()
+        cls.env_patch.stop()
+        cls.temp.cleanup()
 
     def test_01_goals(self):
         res = self.client.get("/api/game/goals")

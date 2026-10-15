@@ -750,6 +750,11 @@ const GameApp = {
             </tbody>
           </table>
         </div>
+        <div class="leaderboard-game-action" style="text-align:center; margin-top:1.25rem;">
+          <button class="btn btn-primary" style="padding:0.6rem 1.75rem; border-radius:9999px; font-size:0.9rem;" onclick="GameApp.selectModeAndStart('${mode}')">
+            🚀 立即挑戰「${this.MODE_NAMES[mode]}」
+          </button>
+        </div>
       `;
     } catch (e) {
       console.error(e);

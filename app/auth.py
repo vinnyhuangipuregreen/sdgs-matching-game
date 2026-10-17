@@ -1,6 +1,9 @@
 import hashlib
 import secrets
 import time
+import json
+import urllib.request
+import urllib.error
 from typing import Optional
 from fastapi import Header, Query, HTTPException, status
 from app.database import get_db_connection
@@ -43,6 +46,24 @@ def verify_admin_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="缺少管理員認證標頭 (Missing Authorization header)"
         )
+
+    if raw_token.startswith("platform:"):
+        request = urllib.request.Request(
+            "https://sdgs-action-platform.vercel.app/api/auth/me",
+            headers={"Authorization": "Bearer " + raw_token.removeprefix("platform:")},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                account = json.load(response)
+        except urllib.error.HTTPError as error:
+            if error.code in (401, 403, 404):
+                raise HTTPException(status_code=401, detail="管理登入已失效，請重新登入統一管理後台")
+            raise HTTPException(status_code=503, detail="統一管理登入暫時無法驗證")
+        except (urllib.error.URLError, TimeoutError, ValueError):
+            raise HTTPException(status_code=503, detail="統一管理登入暫時無法驗證")
+        if account.get("account_type") != "staff" or account.get("role") not in ("admin", "teacher"):
+            raise HTTPException(status_code=403, detail="此帳號沒有管理權限")
+        return {"username": account["email"], "role": account["role"]}
 
     conn = get_db_connection()
     try:

@@ -5,25 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SDGs 17項目標 × 169項細項配對挑戰賽</title>
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/design-system.css?v=20261017_design">
 </head>
-<body>
+<body class="sdgs-shell game-platform">
 
   <!-- Top Header Navigation -->
-  <header>
-    <div class="logo-area">
-      <div class="logo-icon">🌍</div>
-      <div class="logo-title">
-        <h1>SDGs 17項目標 × 169項細項 配對挑戰</h1>
-        <p>聯合國永續發展目標 · 互動式知識學習與連連看遊戲</p>
-      </div>
-    </div>
-    <div class="nav-actions">
-      <button id="btn-nav-handbook" class="btn btn-outline">📖 學習手冊</button>
-      <button id="btn-nav-modes" class="btn btn-outline">🎮 挑戰模式</button>
-      <button id="btn-nav-leaderboard" class="btn btn-outline">🏆 即時排行</button>
-      <a href="/admin" class="btn btn-secondary">⚙️ 管理後台</a>
-    </div>
-  </header>
+  <a class="skip-link" href="#game-main">跳至主要內容</a><header class="platform-header"><div class="platform-header-inner"><a class="platform-brand" href="https://sdgs-action-platform.vercel.app/"><span class="brand-globe" aria-hidden="true">🌏</span><span><strong>SDGs 社會科學實踐系統</strong><small>實踐永續 × 連動分析 × 行動改變 × 共創未來</small></span></a><span class="eyebrow">SDGs 配對挑戰賽</span></div><nav class="platform-nav" aria-label="主要功能"><div class="platform-nav-inner"><a href="https://sdgs-action-platform.vercel.app/">⌂ 首頁</a><a href="/" aria-current="page">🏆 SDGs 配對挑戰賽</a><a href="https://sdgs-action-platform.vercel.app/#worksheet" data-module="analysis">▤ 連動分析練習單</a><a href="https://sdgs-action-platform.vercel.app/#carbon" data-module="carbon">🌿 NSP 活動碳足跡盤查表</a><a href="https://sdgs-action-platform.vercel.app/#food" data-module="food">🥣 臘八粥食材試算表</a><a href="https://sdgs-action-platform.vercel.app/#admin-matching">⚙ 管理後台</a></div></nav><div class="platform-tools"><span>配對賽工具</span><button id="btn-nav-handbook">學習手冊</button><button id="btn-nav-modes">挑戰模式</button><button id="btn-nav-leaderboard">即時排行</button></div></header>
 
   <!-- Official 17 SDGs Rainbow Bar -->
   <div class="sdg-rainbow-bar">
@@ -46,11 +33,11 @@
     <span style="background:var(--sdg-17);"></span>
   </div>
 
-  <main>
+  <main id="game-main" tabindex="-1">
     <!-- View 1: Welcome & Setup -->
     <section id="view-welcome" class="view-section active">
       <div class="card-welcome">
-        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #1e3a8a;">🌱 永續發展目標 配對大挑戰</h2>
+        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #14532d;">🌱 永續發展目標 配對大挑戰</h2>
         <p style="color: #64748b; font-size: 0.95rem; max-width: 600px; margin: 0 auto 1.5rem auto;">
           探索聯合國 2030 永續發展 17 大目標與 169 項具體細項！透過直覺配對與連擊加分機制，測驗你的永續知識，並將榮譽登上全服排行榜！
         </p>
@@ -181,7 +168,7 @@
 
   <footer>
     <p>SDGs 17項目標 × 169項細項目標 配對系統 · 依據「全球目標 Global Goals 台灣中文網」與聯合國官方指標規範</p>
-    <p style="margin-top: 4px;">Pure Green Foundation 綠色公益基金會 © 2026. All Rights Reserved</p>
+    <p style="margin-top: 4px;">綠色公益基金會 © 2026・版權所有</p>
   </footer>
 
   <script src="/static/js/game.js"></script>

@@ -93,14 +93,16 @@
       color: #3730a3;
     }
   </style>
+  <link rel="stylesheet" href="/static/css/design-system.css?v=20261017_design">
+  <script>if (window.top === window.self) location.replace("https://sdgs-action-platform.vercel.app/#admin-matching");</script>
 </head>
-<body>
+<body class="sdgs-shell">
 
   <header>
     <div class="logo-area">
       <div class="logo-icon">🛡️</div>
       <div class="logo-title">
-        <h1>SDGs 配對挑戰 · 後台管理系統</h1>
+        <h1>SDGs 社會科學實踐系統｜配對賽管理</h1>
         <p>系統數據分析 · 挑戰者紀錄審查 · 169項指標維護</p>
       </div>
     </div>
@@ -116,11 +118,11 @@
       <h2 style="font-size: 1.4rem; margin-bottom: 1.5rem; text-align: center;">🔐 管理員身分驗證</h2>
       
       <div class="form-group">
-        <label>帳號 (Username)</label>
+        <label>管理帳號</label>
         <input type="text" id="admin-user" class="form-input" placeholder="請輸入管理帳號" required>
       </div>
       <div class="form-group">
-        <label>密碼 (Password)</label>
+        <label>登入密碼</label>
         <input type="password" id="admin-pass" class="form-input" placeholder="請輸入管理密碼" required>
       </div>
       <button id="btn-do-login" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; justify-content: center;">
@@ -305,7 +307,7 @@
   </div>
 
   <footer>
-    <p>Pure Green Foundation 綠色公益基金會 © 2026. All Rights Reserved</p>
+    <p>綠色公益基金會 © 2026・版權所有</p>
   </footer>
 
   <script src="/static/js/admin.js"></script>

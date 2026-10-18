@@ -5,45 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SDGs 17項目標 × 169項細項配對挑戰賽</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="stylesheet" href="/static/css/design-system.css?v=20261018_game_tool_buttons">
+  <link rel="stylesheet" href="/static/css/design-system.css?v=20261019_ui1280">
 </head>
 <body class="sdgs-shell game-platform">
 
   <!-- Top Header Navigation -->
-  <a class="skip-link" href="#game-main">跳至主要內容</a><header class="platform-header"><div class="platform-header-inner"><a class="platform-brand" href="https://sdgs-action-platform.vercel.app/"><span class="brand-globe" aria-hidden="true">🌏</span><span><strong>BLIA SDGs 社會影響力系統</strong><small>實踐永續 × 連動分析 × 行動改變 × 共創未來</small></span></a><span class="eyebrow">SDGs 配對挑戰賽</span></div><nav class="platform-nav" aria-label="主要功能"><div class="platform-nav-inner"><a href="https://sdgs-action-platform.vercel.app/">⌂ 首頁</a><a href="/" aria-current="page">🏆 SDGs 配對挑戰賽</a><a href="https://sdgs-action-platform.vercel.app/#worksheet" data-module="analysis">▤ 連動分析練習單</a><a href="https://sdgs-action-platform.vercel.app/#carbon" data-module="carbon">🌿 活動碳足跡盤查表</a><a href="https://sdgs-action-platform.vercel.app/#food" data-module="food">🧰 智慧工具箱</a><a href="https://sdgs-attendance-record.vercel.app/">📚 課程登錄</a><a href="https://sdgs-action-platform.vercel.app/#admin-matching">⚙ 管理後台</a></div></nav><div class="platform-tools"><button id="btn-nav-handbook">學習手冊</button><button id="btn-nav-modes">挑戰模式</button><button id="btn-nav-leaderboard">即時排行</button></div></header>
+  <a class="skip-link" href="#game-main">跳至主要內容</a><header class="platform-header" data-ui-version="20261019_ui1280"><div class="platform-header-inner"><a class="platform-brand" href="https://sdgs-action-platform.vercel.app/"><span class="brand-globe" aria-hidden="true">🌏</span><span><strong>BLIA SDGs 社會影響力系統</strong><small>實踐永續 × 連動分析 × 行動改變 × 共創未來</small></span></a><div class="platform-account"><iframe class="ui-account-frame" src="https://sdgs-action-platform.vercel.app/static/ui/account.html?v=20261019_ui1280" title="目前帳號與登入"></iframe></div></div><nav class="platform-nav" aria-label="主要功能"><div class="platform-nav-inner"><a href="https://sdgs-action-platform.vercel.app/#home"><span aria-hidden="true">⌂</span>首頁</a><a href="https://sdgs-matching-game.vercel.app/" aria-current="page"><span aria-hidden="true">🏆</span>SDGs 配對挑戰賽</a><a href="https://sdgs-action-platform.vercel.app/#worksheet"><span aria-hidden="true">▤</span>連動分析練習單</a><a href="https://sdgs-action-platform.vercel.app/#carbon"><span aria-hidden="true">🌿</span>活動碳足跡盤查表</a><a href="https://sdgs-action-platform.vercel.app/#food"><span aria-hidden="true">🧰</span>智慧工具箱</a><a href="https://sdgs-attendance-record.vercel.app/"><span aria-hidden="true">📚</span>課程登錄</a><a href="https://sdgs-action-platform.vercel.app/#admin"><span aria-hidden="true">⚙</span>管理後台</a></div></nav><div class="platform-tools"><button id="btn-nav-handbook">學習手冊</button><button id="btn-nav-modes">挑戰模式</button><button id="btn-nav-leaderboard">即時排行</button></div></header>
 
-  <!-- Official 17 SDGs Rainbow Bar -->
-  <div class="sdg-rainbow-bar">
-    <span style="background:var(--sdg-1);"></span>
-    <span style="background:var(--sdg-2);"></span>
-    <span style="background:var(--sdg-3);"></span>
-    <span style="background:var(--sdg-4);"></span>
-    <span style="background:var(--sdg-5);"></span>
-    <span style="background:var(--sdg-6);"></span>
-    <span style="background:var(--sdg-7);"></span>
-    <span style="background:var(--sdg-8);"></span>
-    <span style="background:var(--sdg-9);"></span>
-    <span style="background:var(--sdg-10);"></span>
-    <span style="background:var(--sdg-11);"></span>
-    <span style="background:var(--sdg-12);"></span>
-    <span style="background:var(--sdg-13);"></span>
-    <span style="background:var(--sdg-14);"></span>
-    <span style="background:var(--sdg-15);"></span>
-    <span style="background:var(--sdg-16);"></span>
-    <span style="background:var(--sdg-17);"></span>
-  </div>
+
 
   <main id="game-main" tabindex="-1">
     <!-- View 1: Welcome & Setup -->
     <section id="view-welcome" class="view-section active">
       <div class="card-welcome">
+        <div class="matching-hero">
         <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #14532d;">🌱 永續發展目標 配對大挑戰</h2>
         <p style="color: #64748b; font-size: 0.95rem; max-width: 600px; margin: 0 auto 1.5rem auto;">
           探索聯合國 2030 永續發展 17 大目標與 169 項具體細項！透過直覺配對與連擊加分機制，測驗你的永續知識，並將榮譽登上全服排行榜！
         </p>
 
         <!-- Challenger Profile Form -->
-        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; border: 1px solid var(--border-color); max-width: 600px; margin: 0 auto 1.5rem auto;">
+        <div class="challenger-profile" style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; border: 1px solid var(--border-color); max-width: 600px; margin: 0 auto 1.5rem auto;">
           <h3 style="font-size: 1rem; color: #334155; margin-bottom: 1rem; text-align: left;">👤 挑戰者基本資料登錄</h3>
           <div style="display: grid; grid-template-columns: 80px 1fr 1fr; gap: 0.75rem;">
             <div class="form-group" style="margin-bottom: 0;">
@@ -69,6 +51,7 @@
           </div>
         </div>
 
+        </div>
         <!-- Mode Selection -->
         <h3 style="font-size: 1.1rem; color: #1e293b; margin-top: 1.5rem; text-align: left;">🎮 選擇挑戰模式</h3>
         <div class="mode-grid">
@@ -166,10 +149,10 @@
     </div>
   </div>
 
-  <footer>
+  <footer class="platform-footer"><div class="platform-footer-inner">
     <p>SDGs 17項目標 × 169項細項目標 配對系統 · 依據「全球目標 Global Goals 台灣中文網」與聯合國官方指標規範</p>
     <p style="margin-top: 4px;">綠色公益基金會 © 2026・版權所有</p>
-  </footer>
+  </div></footer>
 
   <script src="/static/js/game.js"></script>
 </body>

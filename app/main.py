@@ -38,6 +38,8 @@ def startup_event():
 
 app.include_router(game_routes.router)
 app.include_router(admin_routes.router)
+from app.academic_years import install_years
+install_years(app)
 
 def resolve_static_dir():
     candidates = [

@@ -4,11 +4,13 @@ import time
 import json
 import urllib.request
 import urllib.error
+from contextvars import ContextVar
 from typing import Optional
 from fastapi import Header, Query, HTTPException, status
 from app.database import get_db_connection
 
 SESSION_DURATION_SECONDS = 86400
+verified_platform_account = ContextVar("verified_platform_account", default=None)
 
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
@@ -48,6 +50,9 @@ def verify_admin_token(
         )
 
     if raw_token.startswith("platform:"):
+        cached = verified_platform_account.get()
+        if cached and cached[0] == raw_token:
+            return cached[1]
         request = urllib.request.Request(
             "https://sdgs-action-platform.vercel.app/api/auth/me",
             headers={"Authorization": "Bearer " + raw_token.removeprefix("platform:")},
@@ -63,7 +68,7 @@ def verify_admin_token(
             raise HTTPException(status_code=503, detail="統一管理登入暫時無法驗證")
         if account.get("account_type") != "staff" or account.get("role") not in ("admin", "teacher"):
             raise HTTPException(status_code=403, detail="此帳號沒有管理權限")
-        return {"username": account["email"], "role": account["role"]}
+        return {"username": account["email"], "role": account["role"], "academic_year_id": account.get("academic_year", {}).get("id", 1)}
 
     conn = get_db_connection()
     try:

@@ -200,7 +200,7 @@ def check_answer(req: GameAnswerRequest):
     if req.target_id:
         statements.append(("SELECT * FROM targets WHERE id = ?", (req.target_id,)))
     try:
-        if isinstance(conn, TursoConnection):
+        if isinstance(conn, TursoConnection) or isinstance(getattr(conn, "raw", None), TursoConnection):
             results = conn.execute_batch(statements)
         else:
             results = [conn.execute(sql, params) for sql, params in statements]

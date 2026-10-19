@@ -263,16 +263,20 @@ class TursoConnection:
         pass
 
 
-def get_db_connection():
+def get_db_connection(unscoped=False):
     turso_url = os.environ.get("TURSO_DATABASE_URL")
     turso_token = os.environ.get("TURSO_AUTH_TOKEN")
     if is_using_turso():
-        return TursoConnection(turso_url, turso_token)
+        conn = TursoConnection(turso_url, turso_token)
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON;")
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    return conn
+    from app.year_scope import YearConnection, current_year_id
+    from app.academic_years import TABLES
+    year_id = current_year_id.get()
+    return YearConnection(conn, year_id, TABLES) if year_id != 1 and not unscoped else conn
 
 def is_using_turso():
     url = os.environ.get("TURSO_DATABASE_URL", "").strip()

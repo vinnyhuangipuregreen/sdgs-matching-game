@@ -874,6 +874,11 @@ footer {
   background: #f8fafc;
   border-radius: 0.5rem 0.5rem 0 0;
 }
+.game-platform #view-welcome .matching-hero {
+  background-image: linear-gradient(90deg, #f4fcfa1a, #f4fcfa66 35%, #f4fcfa66 65%, #f4fcfa1a), url('../images/sustainability-challenge.png');
+  background-position: center;
+}
+
 .admin-tab-btn.active {
   color: #2563eb;
   border-bottom-color: #2563eb;
